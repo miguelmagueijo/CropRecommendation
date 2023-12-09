@@ -1,3 +1,11 @@
+"""
+Author: Miguel Magueijo
+Description:
+    This file allows user to combine two CSV datasets into one CSV file. The combined file can contain both files labels
+     or only one set of labels for the indicated file (with a flag). The user must run this file on the terminal with
+     positional and optional arguments.
+"""
+
 import pandas as pd
 import argparse
 from datetime import datetime
