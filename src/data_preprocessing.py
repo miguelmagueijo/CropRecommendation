@@ -2,7 +2,7 @@
 Author: Miguel Magueijo
 Description:
     This file aims to show information on terminal about total rows, which columns exists, show if file has duplicated
-     rows and/or null values. After showing information cleans the file by removeing the duplications and/or null values
+     rows and/or null values. After showing information cleans the file by removing the duplications and/or null values
      if it exists. Finally, saves the file as a "<given_name>_Cleaned.csv".
     It's important to mention that class balanced it isn't done in this file.
 """
