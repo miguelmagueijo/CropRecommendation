@@ -5,7 +5,8 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 import pandas as pd
 
 path_prefix = "../Data/"
-filenames = ["AtharvaIngle_CR.csv", "RaulSingh_CR.csv", "KaranNisar_CR.csv"]
+filenames = ["AtharvaIngle_CR.csv", "Kaggle_Cleaned.csv", "RaulSingh_CR.csv", "Harvard_Cleaned.csv",
+             "KaranNisar_CR.csv", "Wandb_Cleaned.csv"]
 
 for f in filenames:
     csv_data = pd.read_csv(path_prefix + f)
@@ -20,10 +21,6 @@ for f in filenames:
         print(f"Before null drop {len(csv_data)}")
         csv_data.dropna(inplace=True)
         print(f"After null drop {len(csv_data)}")
-
-    print(f"Before duplicated drop {len(csv_data)}")
-    csv_data.drop_duplicates(inplace=True)
-    print(f"After duplicated drop {len(csv_data)}")
 
     x_train, x_test, y_train, y_test = train_test_split(csv_data[column_names], csv_data.label, test_size=0.3)
 
