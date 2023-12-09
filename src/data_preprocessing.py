@@ -26,27 +26,27 @@ def show_and_clean_data(name: str, csv_df: pd.DataFrame):
     print(f"Rows: {len(csv_df)}")
     print(f"Columns: {list(csv_df.columns)}")
 
-    has_duplicated_rows = csv_df.duplicated().any()
+    has_duplicate_rows = csv_df.duplicated().any()
 
-    total_dropped = 0
+    total_rows_drop = 0
 
-    if has_duplicated_rows:
-        total_dropped = len(csv_df)
+    if has_duplicate_rows:
+        total_rows_drop = len(csv_df)
         csv_df.drop_duplicates(inplace=True)
-        total_dropped -= len(csv_df)
+        total_rows_drop -= len(csv_df)
 
-    print(f"Has duplicated rows: {has_duplicated_rows} - total removed: {total_dropped}")
+    print(f"Has duplicated rows: {has_duplicate_rows} - total removed: {total_rows_drop}")
 
     has_null_values = csv_df.isnull().values.any()
 
-    total_dropped = 0
+    total_rows_drop = 0
 
     if has_null_values:
-        total_dropped = len(csv_df)
+        total_rows_drop = len(csv_df)
         csv_df.dropna(inplace=True)
-        total_dropped -= len(csv_df)
+        total_rows_drop -= len(csv_df)
 
-    print(f"Has null values: {has_null_values} - total removed: {total_dropped}")
+    print(f"Has null values: {has_null_values} - total removed: {total_rows_drop}")
 
     print("Number of instances of each label:")
     print(csv_df.groupby(by=csv_df.label).size())
