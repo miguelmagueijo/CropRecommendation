@@ -62,7 +62,7 @@ def show_and_clean_data(name: str, csv_df: pd.DataFrame):
     print(f"Cleaned file row count: {len(csv_df)}")
 
     file_name = f"{DATA_PATH_PREFIX}{name}_Cleaned.csv"
-    csv_df.to_csv(file_name)
+    csv_df.to_csv(file_name, index=False)
     print(f"\n\n{name} cleaned and saved as csv \"{file_name}\".\n--------------\n\n\n")
 
 
