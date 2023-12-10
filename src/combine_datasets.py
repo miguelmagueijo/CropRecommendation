@@ -74,7 +74,10 @@ def combine_datasets(first_filename: str, second_filename: str, combined_filenam
         second_filename = path_prefix + second_filename
 
     first_df = pd.read_csv(first_filename)
+    print(f"[INFO] '{first_filename}' loaded - rows: {len(first_df)}")
+
     second_df = pd.read_csv(second_filename)
+    print(f"[INFO] '{second_filename}' loaded - rows: {len(second_df)}")
 
     combined_df = None
 
@@ -102,7 +105,7 @@ def combine_datasets(first_filename: str, second_filename: str, combined_filenam
 
     combined_df.to_csv(combined_filename, index=False)
 
-    print(f"[INFO] Combined file ({combined_filename}) saved")
+    print(f"[INFO] Combined file ('{combined_filename}') saved with {len(combined_df)} rows")
 
 
 parser = argparse.ArgumentParser(description="Combines two dataset files into one, CSV format only.")
