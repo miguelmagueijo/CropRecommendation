@@ -48,6 +48,9 @@ def show_and_clean_data(name: str, csv_df: pd.DataFrame):
 
     print(f"Has null values: {has_null_values} - total removed: {total_rows_drop}")
 
+    #
+    csv_df.label = csv_df.label.str.lower()
+
     print("Number of instances of each label:")
     print(csv_df.groupby(by=csv_df.label).size())
 
