@@ -33,7 +33,7 @@ def combine_datasets(first_filename: str, second_filename: str, combined_filenam
     remove_duplicates: bool, optional
         Flag to remove duplicated rows after file combination (default is True)
     path_prefix: str, optional
-        Path prefix for both file names, must contain '/' or '\' (default is None)
+        Path prefix for both file names, must contain '/' or '\\' (default is None)
     save_combined_on_path: bool, optional
         Flag to save combined file in the same path as other two files (default is False)
 
@@ -91,6 +91,8 @@ def combine_datasets(first_filename: str, second_filename: str, combined_filenam
         combined_df = pd.concat([first_df[first_df["label"].isin(second_df["label"].unique())], second_df])
         print(f"[INFO] Combined file with labels only from second file ({second_filename})")
 
+    print(f"[INFO] Combined file row count is {len(combined_df)}")
+
     if remove_duplicates:
         combined_df.drop_duplicates(inplace=True)
         print("[INFO] Duplicates rows dropped")
@@ -111,22 +113,19 @@ def combine_datasets(first_filename: str, second_filename: str, combined_filenam
 parser = argparse.ArgumentParser(description="Combines two dataset files into one, CSV format only.")
 parser.add_argument("first_fn", metavar="First filename", type=str, help="First dataset filename")
 parser.add_argument("second_fn", metavar="Second filename", type=str, help="Second dataset filename")
-parser.add_argument("--cfn", "--combined_filename", type=str, help="Combined filename")
-parser.add_argument("--ml", "--merge_labels", type=int, help="Flag to mention which labels are combined, "
+parser.add_argument("--cfn", "--combined-filename", type=str, help="Combined filename")
+parser.add_argument("--ml", "--merge-labels", type=int, help="Flag to mention which labels are combined, "
                                                              + "-1 -> only keeps  first file labels only, "
                                                              + "0 (default) -> only keeps both file labels, "
                                                              + "1 -> only keeps second file labels only",
                     default=0)
-parser.add_argument("--rd", "--remove_duplicates", type=bool, help="Flag that indicates if combined file "
-                                                                   "keeps duplicates rows or not (default is True)",
-                    default=True,
-                    action=argparse.BooleanOptionalAction)
-parser.add_argument("--pp", "--path_prefix", type=str, help="Path prefix for filenames, must include last "
+parser.add_argument("--no-rd", "--no-remove-duplicates", help="Flag that indicates to not remove "
+                                                              + "duplicate rows",
+                    action="store_true")
+parser.add_argument("--pp", "--path-prefix", type=str, help="Path prefix for filenames, must include last "
                                                             + "'/' or '\\'")
-parser.add_argument("--swp", "--save_with_prefix", type=bool, help="Flag to save combined file with path "
-                                                                   + "prefix",
-                    default=False,
-                    action=argparse.BooleanOptionalAction)
+parser.add_argument("--swp", "--save-with-prefix", help="Flag to save combined file with path prefix",
+                    action="store_true")
 
 args = parser.parse_args()
 combine_datasets(args.first_fn, args.second_fn, combined_filename=args.cfn, merge_labels=args.ml,
