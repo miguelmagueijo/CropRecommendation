@@ -1,4 +1,4 @@
-# Data sources
+# Sources
 
 | Filename              | Link         |
 |:--------------------- |:------------:|
