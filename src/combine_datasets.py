@@ -12,8 +12,8 @@ from datetime import datetime
 
 
 def combine_datasets(first_filename: str, second_filename: str, combined_filename: str = None, merge_labels: int = 0,
-                     remove_duplicates: bool = True, path_prefix: str = None,
-                     save_combined_on_path: bool = False) -> None:
+                     allow_duplicate_rows: bool = False, path_prefix: str = None, save_combined_on_path: bool = False
+                     ) -> None:
     """Combines two datasets (CSV format), files must already be cleaned (no null values) and have the same columns.
     Saves the combined file as CSV. It is expected both files have column named 'label' as instance class indicator.
 
@@ -30,8 +30,8 @@ def combine_datasets(first_filename: str, second_filename: str, combined_filenam
         Flag to mention which labels to keep in combined dataset, -1 -> only keeps the labels of first file,
          0 -> keeps both labels of both files, 1 -> only keeps the labels of second file,
          other value raises ValueError (defaults is 0)
-    remove_duplicates: bool, optional
-        Flag to remove duplicated rows after file combination (default is True)
+    allow_duplicate_rows: bool, optional
+        Flag to not remove duplicate rows after file combination (default is False)
     path_prefix: str, optional
         Path prefix for both file names, must contain '/' or '\\' (default is None)
     save_combined_on_path: bool, optional
@@ -63,7 +63,7 @@ def combine_datasets(first_filename: str, second_filename: str, combined_filenam
     if merge_labels not in [-1, 0, 1]:
         raise ValueError("'merge_labels' value must be -1, 0 or 1")
 
-    if not isinstance(remove_duplicates, bool):
+    if not isinstance(allow_duplicate_rows, bool):
         raise TypeError("'remove_duplicates' must be a boolean")
 
     if path_prefix is not None and not isinstance(path_prefix, str):
@@ -93,9 +93,10 @@ def combine_datasets(first_filename: str, second_filename: str, combined_filenam
 
     print(f"[INFO] Combined file row count is {len(combined_df)}")
 
-    if remove_duplicates:
+    if not allow_duplicate_rows:
         combined_df.drop_duplicates(inplace=True)
         print("[INFO] Duplicates rows dropped")
+        print(combined_df.label.count())
 
     if combined_filename is None or (combined_filename is not None and len(combined_filename) == 0):
         combined_filename = datetime.now().strftime("%Y%m%d_%H%M%S.csv")
@@ -119,8 +120,8 @@ parser.add_argument("--ml", "--merge-labels", type=int, help="Flag to mention wh
                                                              + "0 (default) -> only keeps both file labels, "
                                                              + "1 -> only keeps second file labels only",
                     default=0)
-parser.add_argument("--no-rd", "--no-remove-duplicates", help="Flag that indicates to not remove "
-                                                              + "duplicate rows",
+parser.add_argument("--adr", "--allow-duplicate-rows", help="Flag that indicates to not remove duplicate "
+                                                            + "rows",
                     action="store_true")
 parser.add_argument("--pp", "--path-prefix", type=str, help="Path prefix for filenames, must include last "
                                                             + "'/' or '\\'")
@@ -129,4 +130,4 @@ parser.add_argument("--swp", "--save-with-prefix", help="Flag to save combined f
 
 args = parser.parse_args()
 combine_datasets(args.first_fn, args.second_fn, combined_filename=args.cfn, merge_labels=args.ml,
-                 remove_duplicates=args.rd, path_prefix=args.pp, save_combined_on_path=args.swp)
+                 allow_duplicate_rows=args.adr, path_prefix=args.pp, save_combined_on_path=args.swp)
