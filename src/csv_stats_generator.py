@@ -49,22 +49,17 @@ def generate_csv_stats(filename: str, stats_filename: str = None, path_prefix: s
     stats_df = pd.DataFrame()
 
     for label in sorted(file_df.label.unique()):
-        label_data = file_df[file_df.label == label].drop(columns=["label"])
+        label_stats_data = file_df[file_df.label == label].describe()
 
-        stats_data = pd.DataFrame([
-            dict(label_data.max()) | {"operation": "max", "label": label},
-            dict(label_data.min()) | {"operation": "min", "label": label},
-            dict(label_data.mean()) | {"operation": "mean", "label": label},
-            dict(label_data.median()) | {"operation": "median", "label": label},
-            dict(label_data.std()) | {"operation": "std", "label": label},
-        ])
+        label_stats_data["operation"] = list(label_stats_data.index)
+        label_stats_data["label"] = label
 
-        stats_df = pd.concat([stats_df, stats_data])
+        stats_df = pd.concat([stats_df, label_stats_data])
 
     if stats_filename is None or len(stats_filename) == 0:
         stats_filename = "stats_" + filename
 
-    stats_df.to_csv(path_prefix + stats_filename)
+    stats_df.to_csv(path_prefix + stats_filename, index=False)
 
 
 parser = argparse.ArgumentParser(description="Generate stats (maximum, minimum, mean, median and deviation values) CSV "
@@ -73,7 +68,7 @@ parser = argparse.ArgumentParser(description="Generate stats (maximum, minimum, 
 parser.add_argument("dataset_fn", type=str, help="Filename of the CSV dataset to generate stats")
 parser.add_argument("--sfn", "--stats_filename", type=str,
                     help="Resulting CSV stats filename, do not include file extension")
-parser.add_argument("--pp", "--path_prefix", type=str,
+parser.add_argument("--pp", "--path_prefix", type=str, default="",
                     help="Path prefix for filename and resulting stats file save")
 
 args = parser.parse_args()
