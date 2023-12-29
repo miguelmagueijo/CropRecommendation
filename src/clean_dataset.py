@@ -102,7 +102,7 @@ if len(sys.argv) > 1:
     args = parser.parse_args()
 
     clean_dataset(args.target_name, save_name=args.sn, path_prefix=args.pp)
-else:  # Code for when running without arguments, when running the file
+else:  # Code for when running the script in the IDE or without arguments
     print("[WARNING] Running script without args")
     DATA_RAW_PATH = "../Data/Raw/"
     DATA_CLEAN_PATH = "../Data/Clean/"
