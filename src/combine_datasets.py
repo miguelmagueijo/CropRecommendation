@@ -1,30 +1,30 @@
 """
 Author: Miguel Magueijo
 Description:
-    This file allows user to combine two CSV datasets into one CSV file. The combined file can contain both files labels
-     or only one set of labels for the indicated file (with a flag). The user must run this file on the terminal with
-     positional and optional arguments.
+    This file allows user to combine multiple CSV datasets into one CSV file. The combined file can contain all files
+    labels or only one set of labels for the indicated file (with a flag). The user must run this file on the terminal
+    with positional and optional arguments.
 """
-
+import sys
+import numpy as np
 import pandas as pd
 import argparse
 from datetime import datetime
 
 
-def combine_datasets(first_filename: str, second_filename: str, combined_filename: str = None, merge_labels: int = 0,
+def combine_datasets(filenames: list[str], combined_filename: str = None, merge_labels: int = 0,
                      allow_duplicate_rows: bool = False, path_prefix: str = None, save_combined_on_path: bool = False
                      ) -> None:
-    """Combines two datasets (CSV format), files must already be cleaned (no null values) and have the same columns.
-    Saves the combined file as CSV. It is expected both files have column named 'label' as instance class indicator.
+    """Combines multiple datasets (CSV format), files must already be cleaned (no null values) and have the same
+    columns. Saves the combined file as CSV. It is expected both files have column named 'label' as instance class
+    indicator.
 
     Parameters
     ----------
-    first_filename: str
-        Name of first file
-    second_filename: str
-        Name of second file
+    filenames: list[str]
+        Name of the datasets that are going to be combined. Must contain at least 2 filenames
     combined_filename: str, optional
-        Name of the combined file name (without file extension), if not set names it to the current datetime
+        Name of the combined file name, if not set names it to the current datetime
          (default is None)
     merge_labels: int, optional
         Flag to mention which labels to keep in combined dataset, -1 -> only keeps the labels of first file,
@@ -40,6 +40,7 @@ def combine_datasets(first_filename: str, second_filename: str, combined_filenam
     Raises
     ------
     ValueError
+        If filenames length is less than 2
         If merge_labels has value other than -1, 0 or 1
     TypeError
         If any type of given parameters isn't the correct one
@@ -51,11 +52,11 @@ def combine_datasets(first_filename: str, second_filename: str, combined_filenam
         None
     """
 
-    if not isinstance(first_filename, str):
-        raise TypeError("'first_filename' must be a string")
+    if not isinstance(filenames, list) and not all(isinstance(name, str) for name in filenames):
+        raise TypeError("'filenames' must be a list of strings")
 
-    if not isinstance(second_filename, str):
-        raise TypeError("'second_filename' must be a string")
+    if len(filenames) < 2:
+        raise ValueError("'filenames' must contain at least two datasets names")
 
     if not isinstance(merge_labels, int):
         raise TypeError("'merge_labels' must be an integer")
@@ -70,26 +71,29 @@ def combine_datasets(first_filename: str, second_filename: str, combined_filenam
         raise TypeError("'path_prefix' must be a string")
 
     if path_prefix is not None:
-        first_filename = path_prefix + first_filename
-        second_filename = path_prefix + second_filename
+        filenames = map(lambda fn: path_prefix + fn, filenames)
 
-    first_df = pd.read_csv(first_filename)
-    print(f"[INFO] '{first_filename}' loaded - rows: {len(first_df)}")
+    combined_df = pd.read_csv(filenames[0])
+    print(f"[INFO] '{filenames[0]}' loaded - rows: {len(combined_df)}")
 
-    second_df = pd.read_csv(second_filename)
-    print(f"[INFO] '{second_filename}' loaded - rows: {len(second_df)}")
+    for fn in filenames[1:]:
+        to_join_df = pd.read_csv(fn)
+        print(f"[INFO] '{fn}' loaded - rows: {len(to_join_df)}")
 
-    combined_df = None
+        if merge_labels == 0:
+            combined_df = pd.concat([combined_df, to_join_df])
+            print("[INFO] Combined file with labels of both files")
+        elif merge_labels == -1:
+            combined_df = pd.concat([combined_df, to_join_df[to_join_df["label"].isin(combined_df["label"].unique())]])
+            print(f"[INFO] Combined file with labels only from first file ({filenames[0]})")
+        elif merge_labels == 1:
+            combined_df = pd.concat([combined_df[combined_df["label"].isin(to_join_df["label"].unique())], to_join_df])
+            print(f"[INFO] Combined file with labels only in {fn}")
 
-    if merge_labels == 0:
-        combined_df = pd.concat([first_df, second_df])
-        print("[INFO] Combined file with labels of both files")
-    elif merge_labels == -1:
-        combined_df = pd.concat([first_df, second_df[second_df["label"].isin(first_df["label"].unique())]])
-        print(f"[INFO] Combined file with labels only from first file ({first_filename})")
-    elif merge_labels == 1:
-        combined_df = pd.concat([first_df[first_df["label"].isin(second_df["label"].unique())], second_df])
-        print(f"[INFO] Combined file with labels only from second file ({second_filename})")
+    # Fix float point precision because 6.502985292 != 6.502985292000001
+    for col in combined_df.select_dtypes(include=[float]).columns:
+        if combined_df[col].dtype == "float":
+            combined_df[col] = combined_df[col].round(10)
 
     print(f"[INFO] Combined file row count is {len(combined_df)}")
 
@@ -106,28 +110,38 @@ def combine_datasets(first_filename: str, second_filename: str, combined_filenam
     if save_combined_on_path:
         combined_filename = path_prefix + combined_filename
 
+    if not combined_filename.endswith(".csv"):
+        combined_filename += ".csv"
+
     combined_df.to_csv(combined_filename, index=False)
 
     print(f"[INFO] Combined file ('{combined_filename}') saved with {len(combined_df)} rows")
 
 
 parser = argparse.ArgumentParser(description="Combines two dataset files into one, CSV format only.")
-parser.add_argument("first_fn", metavar="First filename", type=str, help="First dataset filename")
-parser.add_argument("second_fn", metavar="Second filename", type=str, help="Second dataset filename")
-parser.add_argument("--cfn", "--combined-filename", type=str, help="Combined filename")
+parser.add_argument("filenames", metavar="Multiple filenames", nargs="+",
+                    help="Filenames of every dataset to combine")
+parser.add_argument("--cfn", "--combined-filename", help="Combined filename")
 parser.add_argument("--ml", "--merge-labels", type=int, help="Flag to mention which labels are combined, "
-                                                             + "-1 -> only keeps  first file labels only, "
+                                                             + "-1 -> only keeps first file labels only, "
                                                              + "0 (default) -> only keeps both file labels, "
-                                                             + "1 -> only keeps second file labels only",
+                                                             + "1 -> only keeps second and onwards files labels only",
                     default=0)
 parser.add_argument("--adr", "--allow-duplicate-rows", help="Flag that indicates to not remove duplicate "
                                                             + "rows",
                     action="store_true")
-parser.add_argument("--pp", "--path-prefix", type=str, help="Path prefix for filenames, must include last "
-                                                            + "'/' or '\\'")
+parser.add_argument("--pp", "--path-prefix", help="Path prefix for filenames, must include last "
+                                                  + "'/' or '\\'")
 parser.add_argument("--swp", "--save-with-prefix", help="Flag to save combined file with path prefix",
                     action="store_true")
 
-args = parser.parse_args()
-combine_datasets(args.first_fn, args.second_fn, combined_filename=args.cfn, merge_labels=args.ml,
-                 allow_duplicate_rows=args.adr, path_prefix=args.pp, save_combined_on_path=args.swp)
+if len(sys.argv) > 1:
+    args = parser.parse_args()
+    combine_datasets(args.filenames, combined_filename=args.cfn, merge_labels=args.ml,
+                     allow_duplicate_rows=args.adr, path_prefix=args.pp, save_combined_on_path=args.swp)
+else:  # Code for when running the script in the IDE or without arguments
+    combine_datasets(["../Data/Clean/Clean_AtharvaIngle_CR.csv", "../Data/Clean/Clean_RaulSingh_CR.csv",
+                      "../Data/Clean/Clean_KaranNisar_CR.csv"],
+                     combined_filename="../Data/CleanCombinations/Combined_CR", merge_labels=0,
+                     allow_duplicate_rows=False)
+    pass
