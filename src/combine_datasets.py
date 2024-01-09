@@ -92,8 +92,7 @@ def combine_datasets(filenames: list[str], combined_filename: str = None, merge_
 
     # Fix float point precision because 6.502985292 != 6.502985292000001
     for col in combined_df.select_dtypes(include=[float]).columns:
-        if combined_df[col].dtype == "float":
-            combined_df[col] = combined_df[col].round(10)
+        combined_df[col] = combined_df[col].round(10)
 
     print(f"[INFO] Combined file row count is {len(combined_df)}")
 
