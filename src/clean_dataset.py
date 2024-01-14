@@ -54,7 +54,8 @@ def clean_dataset(target_name: str = None, save_name: str = None, path_prefix: s
 
     if has_duplicate_rows:
         total_rows_drop = len(csv_df)
-        csv_df.drop_duplicates(inplace=True)
+        # Don't use label as an instance differentiate because one instance only corresponds to one crop
+        csv_df = csv_df[~csv_df.drop("label", axis=1).duplicated()]
         total_rows_drop -= len(csv_df)
         print(f"[TRANSFORMATION] Dataset was flagged with duplicated rows... a total of {total_rows_drop} rows were "
               + "removed")
@@ -106,12 +107,12 @@ else:  # Code for when running the script in the IDE or without arguments
     print("[WARNING] Running script without args")
     DATA_RAW_PATH = "../Data/Raw/"
     DATA_CLEAN_PATH = "../Data/Clean/"
-    clean_dataset(f"{DATA_RAW_PATH}AtharvaIngle_CR.csv",
-                  save_name=f"{DATA_CLEAN_PATH}Clean_AtharvaIngle_CR.csv")
-    clean_dataset(f"{DATA_RAW_PATH}RaulSingh_CR.csv",
-                  save_name=f"{DATA_CLEAN_PATH}Clean_RaulSingh_CR.csv")
-    clean_dataset(f"{DATA_RAW_PATH}KaranNisar_CR.csv",
-                  save_name=f"{DATA_CLEAN_PATH}Clean_KaranNisar_CR.csv")
-    clean_dataset(f"{DATA_RAW_PATH}Manikanta_CR.csv",
-                  save_name=f"{DATA_CLEAN_PATH}Clean_Manikanta_CR.csv")
+    clean_dataset(target_name=DATA_RAW_PATH + "AtharvaIngle_CR.csv",
+                  save_name=DATA_CLEAN_PATH + "AtharvaIngle_CR.csv")
+    clean_dataset(target_name=DATA_RAW_PATH + "RaulSingh_CR.csv",
+                  save_name=DATA_CLEAN_PATH + "RaulSingh_CR.csv")
+    clean_dataset(target_name=DATA_RAW_PATH + "KaranNisar_CR.csv",
+                  save_name=DATA_CLEAN_PATH + "KaranNisar_CR.csv")
+    clean_dataset(target_name=DATA_RAW_PATH + "Manikanta_CR.csv",
+                  save_name=DATA_CLEAN_PATH + "Manikanta_CR.csv")
     pass
