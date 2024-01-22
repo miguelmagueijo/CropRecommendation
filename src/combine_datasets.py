@@ -97,9 +97,10 @@ def combine_datasets(filenames: list[str], combined_filename: str = None, merge_
     print(f"[INFO] Combined file row count is {len(combined_df)}")
 
     if not allow_duplicate_rows:
+        initial_rows = len(combined_df)
+        combined_df = combined_df[~combined_df.drop("label", axis=1).duplicated()]
         combined_df.drop_duplicates(inplace=True)
-        print("[INFO] Duplicates rows dropped")
-        print(combined_df.label.count())
+        print(f"[INFO] A total of {initial_rows - len(combined_df)} row have been removed, flagged as duplicates")
 
     if combined_filename is None or (combined_filename is not None and len(combined_filename) == 0):
         combined_filename = datetime.now().strftime("%Y%m%d_%H%M%S.csv")
@@ -139,8 +140,8 @@ if len(sys.argv) > 1:
     combine_datasets(args.filenames, combined_filename=args.cfn, merge_labels=args.ml,
                      allow_duplicate_rows=args.adr, path_prefix=args.pp, save_combined_on_path=args.swp)
 else:  # Code for when running the script in the IDE or without arguments
-    combine_datasets(["../Data/Clean/Clean_AtharvaIngle_CR.csv", "../Data/Clean/Clean_RaulSingh_CR.csv",
-                      "../Data/Clean/Clean_KaranNisar_CR.csv"],
-                     combined_filename="../Data/CleanCombinations/Combined_CR", merge_labels=0,
+    combine_datasets(["../Data/Clean/AtharvaIngle_CR.csv", "../Data/Clean/RaulSingh_CR.csv",
+                      "../Data/Clean/KaranNisar_CR.csv"],
+                     combined_filename="../Data/Combinations/Combined_CR", merge_labels=0,
                      allow_duplicate_rows=False)
     pass
