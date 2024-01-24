@@ -8,7 +8,6 @@ WORKDIR /app
 
 COPY ./requirements.txt ./requirements.txt
 
-
 RUN pip install --no-cache-dir -qqr requirements.txt && pip install --no-cache-dir -qq gunicorn==21.2.0
 
 COPY ./app.py ./app.py
