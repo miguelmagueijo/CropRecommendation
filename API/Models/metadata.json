@@ -1,0 +1,116 @@
+{
+    "exported_on": 1706108496,
+    "warnings": [
+        "Some models, such as XGBoost, require label encoding that cannot be incorporated in the pipeline. Use LabelEncoder() and fit it with the array of \"classes\"."
+    ],
+    "train_size": 0.75,
+    "test_size": 0.25,
+    "split_train_test_random_seed": 420,
+    "feature_selection_algorithms_random_seed": 2024,
+    "training_algorithms_random_seed": 1374,
+    "features_sets": {
+        "s0": [
+            "N",
+            "P",
+            "K",
+            "ph",
+            "EC",
+            "S",
+            "Cu",
+            "Fe",
+            "Mn",
+            "Zn",
+            "B"
+        ],
+        "s1": [
+            "N",
+            "P",
+            "K",
+            "ph",
+            "EC",
+            "S",
+            "Fe",
+            "Mn",
+            "Zn",
+            "B"
+        ],
+        "s2": [
+            "K",
+            "EC",
+            "S",
+            "Fe",
+            "Mn",
+            "B"
+        ]
+    },
+    "classes": [
+        "grapes",
+        "mango",
+        "mulberry",
+        "pomegranate",
+        "potato",
+        "ragi"
+    ],
+    "features_info": {
+        "N": {
+            "type": "int64",
+            "min": 30,
+            "max": 198
+        },
+        "P": {
+            "type": "int64",
+            "min": 10,
+            "max": 100
+        },
+        "K": {
+            "type": "int64",
+            "min": 51,
+            "max": 369
+        },
+        "ph": {
+            "type": "float64",
+            "min": 4,
+            "max": 8
+        },
+        "EC": {
+            "type": "float64",
+            "min": 0,
+            "max": 3
+        },
+        "S": {
+            "type": "float64",
+            "min": 0,
+            "max": 1
+        },
+        "Cu": {
+            "type": "float64",
+            "min": 5,
+            "max": 35
+        },
+        "Fe": {
+            "type": "float64",
+            "min": 38,
+            "max": 277
+        },
+        "Mn": {
+            "type": "float64",
+            "min": 20,
+            "max": 1573
+        },
+        "Zn": {
+            "type": "float64",
+            "min": 17,
+            "max": 70
+        },
+        "B": {
+            "type": "float64",
+            "min": 1,
+            "max": 75
+        }
+    },
+    "models_full_name": {
+        "RF": "Random Forest",
+        "SVC": "Support Vector Classifier",
+        "XGBRF": "XGBoost (with Random Forest)"
+    }
+}
