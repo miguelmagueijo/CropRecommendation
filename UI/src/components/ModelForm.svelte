@@ -1,11 +1,11 @@
 <script lang="ts">
     export let id: string;
+    export let baseUrl: string;
     export let modelName: string;
     export let features: string[];
 
 
     let submitted = false;
-    let requestOutput: string = "";
     let requestError = false;
     let outputDiv: HTMLElement;
 
@@ -55,7 +55,7 @@
     <div class="mb-2 text-xl">
         <b>{ modelName }</b>
     </div>
-    <form action="http://localhost:5000/predict/{id}" on:submit|preventDefault={predictClass}>
+    <form action="{baseUrl}/predict/{id}" on:submit|preventDefault={predictClass}>
         <div class="grid gap-4 features-grid-columns">
             {#each features as fName }
                 <div>

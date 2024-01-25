@@ -3,7 +3,7 @@
 </script>
 
 <nav class="mb-12 mt-4 flex items-center justify-center sm:justify-between flex-wrap gap-2 rounded border-2 border-green-500 p-4">
-	<div class="flex items-center gap-2">
+	<a class="flex items-center gap-2" href="/">
 		<svg class="h-8 w-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 122.88 114.86"
 			><defs
 				><style>
@@ -17,7 +17,7 @@
 			/>
         </svg>
 		<h1 class="text-2xl font-bold text-green-900">Crops Recommendation</h1>
-	</div>
+	</a>
 	<div class="select-none text-sm font-bold text-green-900/40">This is a prototype</div>
 </nav>
 
