@@ -6,39 +6,45 @@
 
 	let cropsClasses: string[] = [];
 	let finished = false;
+	let loadFail = false;
 	let modelNameDict: Record<string, string> = {};
 	let selectedModelsId: Array<string> = [];
 
 	onMount(async () => {
-		const responses = await Promise.all([
-			fetch('http://localhost:5000/models-names'),
-			fetch('http://localhost:5000/crops'),
-			fetch('http://localhost:5000/models')
-		]);
+		try {
+			const responses = await Promise.all([
+				fetch('http://localhost:5000/models-names'),
+				fetch('http://localhost:5000/crops'),
+				fetch('http://localhost:5000/models')
+			]);
 
-		modelNameDict = await responses[0].json();
-		cropsClasses = await responses[1].json();
-		const modelsRawData = await responses[2].json();
+			modelNameDict = await responses[0].json();
+			cropsClasses = await responses[1].json();
+			const modelsRawData = await responses[2].json();
 
-		for (const featureSetId in modelsRawData) {
-			for (const modelAbbreviation of modelsRawData[featureSetId].models) {
-				const modelFeatures = modelsRawData[featureSetId].features;
+			for (const featureSetId in modelsRawData) {
+				for (const modelAbbreviation of modelsRawData[featureSetId].models) {
+					const modelFeatures = modelsRawData[featureSetId].features;
 
-				allModels.push({
-					id: featureSetId + '_' + modelAbbreviation,
-					select_id: modelAbbreviation + ` with ${modelFeatures.length} features`,
-					short_name: modelAbbreviation,
-					full_name: modelNameDict[modelAbbreviation],
-					features: modelFeatures
-				});
+					allModels.push({
+						id: featureSetId + '_' + modelAbbreviation,
+						select_id: modelAbbreviation + ` with ${modelFeatures.length} features`,
+						short_name: modelAbbreviation,
+						full_name: modelNameDict[modelAbbreviation],
+						features: modelFeatures
+					});
+				}
 			}
+
+			selectedModelsId.push(allModels[0].select_id);
+
+			finished = Boolean(
+				cropsClasses.length && allModels.length && Object.keys(modelNameDict).length
+			);
+		} catch (e) {
+			finished = true;
+			loadFail = true;
 		}
-
-		selectedModelsId.push(allModels[0].select_id);
-
-		finished = Boolean(
-			cropsClasses.length && allModels.length && Object.keys(modelNameDict).length
-		);
 	});
 
 	function selectModel(e: Event, modelId: string) {
@@ -82,49 +88,58 @@
 		>
 	</div>
 {:else}
-	<div class="space-y-10">
-		<section>
-			<div class="mb-4 flex items-center justify-between">
-				<h2 class="text-2xl font-bold">Crops that models can recommend</h2>
-				<div class="rounded border-2 border-lime-400 px-4 py-1">Total: {cropsClasses.length}</div>
+	{#if loadFail}
+		<div class="my-60">
+			<svg class="mx-auto h-20 w-20 fill-red-500" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 122.88 122.88" style="enable-background:new 0 0 122.88 122.88" xml:space="preserve"><style type="text/css">.st0{fill-rule:evenodd;clip-rule:evenodd;}</style><g><path class="st0" d="M110.09,6.2l6.58,6.58c8.27,8.27,8.27,21.81,0,30.08L99.24,60.29c-6.52,6.53-16.33,7.89-24.24,4.12 l30.86-30.86c3.05-3.05,3.05-8.03,0-11.07l-5.97-5.97c-3.05-3.05-8.02-3.05-11.07,0L58.15,47.17c-3.37-7.78-1.9-17.2,4.43-23.53 L80.02,6.2C88.29-2.07,101.82-2.07,110.09,6.2L110.09,6.2z M79.93,116.8l6.38-1.32l-4.12-19.89l-6.37,1.34L79.93,116.8L79.93,116.8 L79.93,116.8z M36.38,2.15l6.31-1.56l4.95,19.66l-6.31,1.6L36.38,2.15L36.38,2.15z M102.86,105.79l4.53-4.67L92.82,86.98 l-4.53,4.68L102.86,105.79L102.86,105.79L102.86,105.79z M117.62,84.76l1.68-6.28l-19.6-5.26l-1.69,6.29L117.62,84.76L117.62,84.76 z M2.54,40.47l1.81-6.25l19.5,5.55l-1.77,6.27L2.54,40.47L2.54,40.47z M13.38,17.17l4.61-4.6l14.34,14.35l-4.59,4.61L13.38,17.17 L13.38,17.17L13.38,17.17z M6.2,110.09l6.58,6.58c8.27,8.27,21.8,8.27,30.08,0l17.43-17.43c6.53-6.52,7.89-16.33,4.12-24.24 l-30.86,30.86c-3.05,3.05-8.03,3.05-11.07,0l-5.97-5.97c-3.05-3.05-3.05-8.03,0-11.08l30.67-30.66c-7.79-3.37-17.2-1.9-23.54,4.44 L6.2,80.02C-2.07,88.29-2.07,101.82,6.2,110.09L6.2,110.09L6.2,110.09z"/></g></svg>
+			<div class="text-center text-red-500 mt-8 font-bold text-3xl w-fit mx-auto rounded">
+				Could not connect to the API.<br>Try again later.
 			</div>
-			<div class="grid-fill-columns grid gap-4 rounded border-2 border-lime-400 bg-lime-100 p-4">
-				{#each cropsClasses as cName}
-					<div class="rounded bg-lime-400 px-4 py-2 text-center font-bold capitalize">
-						{cName}
-					</div>
-				{/each}
-			</div>
-		</section>
-
-		<section>
-			<h2 class="mb-4 text-2xl font-bold">Models</h2>
-
-			<div class="grid-models-fill-columns mb-4 grid gap-4">
-				{#each allModels as model}
-					<button
-						class="group flex cursor-pointer items-center space-x-2 {selectedModelsId.includes(model.select_id) ? 'selected' : null}"
-						on:click={(e) => selectModel(e, model.select_id)}
-					>
-						<div
-							class="pointer-events-none h-6 w-6 rounded border-2 border-green-500 group-[.selected]:bg-green-500"
-						></div>
-						<div class="pointer-events-none">
-							{model.select_id}
+		</div>
+	{:else}
+		<div class="space-y-10">
+			<section>
+				<div class="mb-4 flex items-center justify-between">
+					<h2 class="text-2xl font-bold">Crops that models can recommend</h2>
+					<div class="rounded border-2 border-lime-400 px-4 py-1">Total: {cropsClasses.length}</div>
+				</div>
+				<div class="grid-fill-columns grid gap-4 rounded border-2 border-lime-400 bg-lime-100 p-4">
+					{#each cropsClasses as cName}
+						<div class="rounded bg-lime-400 px-4 py-2 text-center font-bold capitalize">
+							{cName}
 						</div>
-					</button>
-				{/each}
-			</div>
+					{/each}
+				</div>
+			</section>
 
-			<div class="space-y-6">
-				{#each allModels as model}
-					{#if selectedModelsId.includes(model.select_id)}
-						<ModelForm id={model.id} modelName={model.full_name} features={model.features} />
-					{/if}
-				{/each}
-			</div>
-		</section>
-	</div>
+			<section>
+				<h2 class="mb-4 text-2xl font-bold">Models</h2>
+
+				<div class="grid-models-fill-columns mb-4 grid gap-4">
+					{#each allModels as model}
+						<button
+							class="group flex cursor-pointer items-center space-x-2 {selectedModelsId.includes(model.select_id) ? 'selected' : null}"
+							on:click={(e) => selectModel(e, model.select_id)}
+						>
+							<div
+								class="pointer-events-none h-6 w-6 rounded border-2 border-green-500 group-[.selected]:bg-green-500"
+							></div>
+							<div class="pointer-events-none">
+								{model.select_id}
+							</div>
+						</button>
+					{/each}
+				</div>
+
+				<div class="space-y-6">
+					{#each allModels as model}
+						{#if selectedModelsId.includes(model.select_id)}
+							<ModelForm id={model.id} modelName={model.full_name} features={model.features} />
+						{/if}
+					{/each}
+				</div>
+			</section>
+		</div>
+	{/if}
 {/if}
 
 <style>
