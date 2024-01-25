@@ -3,37 +3,55 @@ import json
 import re
 import pandas as pd
 
+from functools import wraps
+from pathlib import Path
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from skops.io import get_untrusted_types, load as load_model
 from sklearn.preprocessing import LabelEncoder
 
+EXPORTS_PATH = Path("Models/")
 
 models = {}
-metadata = None
-label_encoder = LabelEncoder()
+metadata = {}
+label_encoders = {}
 unknown_model_types = []
 
-with open("Models/metadata.json", "r") as file:
-    metadata = json.load(file)
+for folder_name in os.listdir(EXPORTS_PATH):
+    FOLDER_PATH = EXPORTS_PATH.joinpath(folder_name)
+    
+    if FOLDER_PATH.is_dir():
+        export_name = ""
 
-for file in os.listdir("Models/"):
-    if file.endswith(".skops"):
-        filename = file[:-6]
-        feature_set_id, model_key = filename.split("_")
+        with open(FOLDER_PATH.joinpath("metadata.json"), "r") as m_file:
+            raw_metadata = json.load(m_file)
 
-        if "XGB" in model_key or "LGBM" in model_key:
-            unknown_model_types += get_untrusted_types(file=f"Models/{file}")
-        
-        if feature_set_id not in models:
-            models[feature_set_id] = {
-                "features": metadata["features_sets"][feature_set_id],
-                "models": [model_key]
-            }
-        else:
-            models[feature_set_id]["models"].append(model_key)
+            export_name = raw_metadata["dataset_name"]
 
-label_encoder.fit(metadata["classes"])
+            lb_encoder = LabelEncoder()
+            lb_encoder.fit(raw_metadata["classes"])
+            label_encoders[export_name] = lb_encoder
+            metadata[export_name] = raw_metadata
+
+
+        for filename in os.listdir(FOLDER_PATH):
+            if filename.endswith(".skops"):
+                filename = filename[:-6]
+                feature_set_id, model_key = filename.split("_")
+
+                if "XGB" in model_key or "LGBM" in model_key:
+                    unknown_model_types += get_untrusted_types(file=FOLDER_PATH.joinpath(filename + ".skops"))
+                
+                if export_name not in models:
+                    models[export_name] = {}
+
+                if feature_set_id not in models[export_name]:
+                    models[export_name][feature_set_id] = {
+                        "features": metadata[export_name]["features_sets"][feature_set_id],
+                        "models": [model_key]
+                    }
+                else:
+                    models[export_name][feature_set_id]["models"].append(model_key)
 
 #############
 # Flask APP #
@@ -41,49 +59,81 @@ label_encoder.fit(metadata["classes"])
 app = Flask("Crop Recommendation")
 CORS(app)
 
+def check_dataset():
+    def _check_dataset(f):
+        @wraps(f)
+        def __check_dataset(*args, **kwargs):
+            dataset_name = kwargs.get("dataset_name")
+
+            if dataset_name is None:
+                return jsonify({"error": "no_dataset_name"}), 400
+            
+            if dataset_name not in models.keys():
+                return jsonify({"error": "invalid_dataset"}), 400
+            
+            result = f(*args, **kwargs)
+            
+            # After request
+            
+            return result
+        
+        return __check_dataset
+    
+    return _check_dataset
+
 @app.route("/")
 def status():
     return jsonify({"status": "ok"})
 
+@app.route("/datasets")
+def get_datasets():
+    return jsonify({"datasets": list(models.keys())})
 
-@app.route("/models")
-def get_models():
-    return jsonify(models)
+@app.route("/<dataset_name>/models")
+@check_dataset()
+def get_models(dataset_name: str):
+    return jsonify(models[dataset_name])
 
-@app.route("/features")
-def get_features():
-    return jsonify(metadata["features_info"])
+@app.route("/<dataset_name>/features")
+@check_dataset()
+def get_features(dataset_name: str):
+    return jsonify(metadata[dataset_name]["features_info"])
 
-@app.route("/crops")
-def get_classes():
-    return jsonify(metadata["classes"])
+@app.route("/<dataset_name>/crops")
+@check_dataset()
+def get_classes(dataset_name: str):
+    return jsonify(metadata[dataset_name]["classes"])
 
-@app.route("/models-names")
-def get_models_names():
-    return jsonify(metadata["models_full_name"])
+@app.route("/<dataset_name>/models-names")
+@check_dataset()
+def get_models_names(dataset_name: str):
+    return jsonify(metadata[dataset_name]["models_full_name"])
 
-@app.route("/predict/<model_name>", methods=["POST"])
-def predict(model_name: str):
+@app.route("/<dataset_name>/predict/<model_name>", methods=["POST"])
+def predict(dataset_name: str, model_name: str):
     post_body = request.form
+
+    dataset_metadata = metadata[dataset_name]
+    dataset_models = models[dataset_name]
 
     if not re.match("^s[0-9]{1,2}_[A-Z]+$", model_name):
         return jsonify({"error": "bad_model_name"}), 400
 
     feature_set_id, model_key = model_name.split("_")
 
-    if feature_set_id not in metadata["features_sets"]:
+    if feature_set_id not in dataset_metadata["features_sets"]:
         return jsonify({"error": "bad_feature_set"}), 400
     
-    if model_key not in models[feature_set_id]["models"]:
+    if model_key not in dataset_models[feature_set_id]["models"]:
         return jsonify({"error": "non_existing_model"}), 400
 
-    if set(post_body.keys()) != set(metadata["features_sets"][feature_set_id]):
+    if set(post_body.keys()) != set(dataset_metadata["features_sets"][feature_set_id]):
         return jsonify({"error": "bad_model_features"}), 400
     
     model = None
 
     try:
-        model = load_model(f"Models/{model_name}.skops", trusted=unknown_model_types)
+        model = load_model(f"Models/{dataset_name}/{model_name}.skops", trusted=unknown_model_types)
     except Exception as e:
         print(e)
         return jsonify({"error": "load_model"}), 400
@@ -94,7 +144,7 @@ def predict(model_name: str):
             return jsonify({"error": "value_is_empty"}), 400
 
         try: 
-            if metadata["features_info"][key]["type"].startswith("int"):
+            if dataset_metadata["features_info"][key]["type"].startswith("int"):
                 instance_dict[key] = int(value)
             else: 
                 instance_dict[key] = float(value)
@@ -105,7 +155,7 @@ def predict(model_name: str):
     prediction_class = model.predict(instance)[0]
 
     if "XGB" in model_key:
-        prediction_class = label_encoder.inverse_transform([prediction_class])[0]
+        prediction_class = label_encoders[dataset_name].inverse_transform([prediction_class])[0]
 
     return jsonify({"prediction": prediction_class})
 

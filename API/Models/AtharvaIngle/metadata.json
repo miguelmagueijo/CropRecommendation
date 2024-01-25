@@ -1,0 +1,99 @@
+{
+    "dataset_name": "AtharvaIngle",
+    "exported_on": 1706218706,
+    "warnings": [],
+    "train_size": 0.75,
+    "test_size": 0.25,
+    "split_train_test_random_seed": 420,
+    "feature_selection_algorithms_random_seed": 2024,
+    "training_algorithms_random_seed": 1374,
+    "features_sets": {
+        "s0": [
+            "N",
+            "P",
+            "K",
+            "temperature",
+            "humidity",
+            "ph",
+            "rainfall"
+        ],
+        "s1": [
+            "P",
+            "K",
+            "humidity",
+            "rainfall"
+        ],
+        "s2": [
+            "N",
+            "P",
+            "humidity",
+            "rainfall"
+        ]
+    },
+    "classes": [
+        "apple",
+        "banana",
+        "blackgram",
+        "chickpea",
+        "coconut",
+        "coffee",
+        "cotton",
+        "grapes",
+        "jute",
+        "kidneybeans",
+        "lentil",
+        "maize",
+        "mango",
+        "mothbeans",
+        "mungbean",
+        "muskmelon",
+        "orange",
+        "papaya",
+        "pigeonpeas",
+        "pomegranate",
+        "rice",
+        "watermelon"
+    ],
+    "features_info": {
+        "N": {
+            "type": "int64",
+            "min": 0,
+            "max": 140
+        },
+        "P": {
+            "type": "int64",
+            "min": 5,
+            "max": 145
+        },
+        "K": {
+            "type": "int64",
+            "min": 5,
+            "max": 205
+        },
+        "temperature": {
+            "type": "float64",
+            "min": 8,
+            "max": 44
+        },
+        "humidity": {
+            "type": "float64",
+            "min": 14,
+            "max": 100
+        },
+        "ph": {
+            "type": "float64",
+            "min": 3,
+            "max": 10
+        },
+        "rainfall": {
+            "type": "float64",
+            "min": 20,
+            "max": 299
+        }
+    },
+    "models_full_name": {
+        "RF": "Random Forest",
+        "LGBM": "LightGBM",
+        "DT": "Decision Tree"
+    }
+}
