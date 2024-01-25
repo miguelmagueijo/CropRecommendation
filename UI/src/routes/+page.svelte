@@ -1,0 +1,138 @@
+<script lang="ts">
+	import { onMount } from 'svelte';
+	import ModelForm from '../components/ModelForm.svelte';
+
+	let allModels: Array<any> = [];
+
+	let cropsClasses: string[] = [];
+	let finished = false;
+	let modelNameDict: Record<string, string> = {};
+	let selectedModelsId: Array<string> = [];
+
+	onMount(async () => {
+		const responses = await Promise.all([
+			fetch('http://localhost:5000/models-names'),
+			fetch('http://localhost:5000/crops'),
+			fetch('http://localhost:5000/models')
+		]);
+
+		modelNameDict = await responses[0].json();
+		cropsClasses = await responses[1].json();
+		const modelsRawData = await responses[2].json();
+
+		for (const featureSetId in modelsRawData) {
+			for (const modelAbbreviation of modelsRawData[featureSetId].models) {
+				const modelFeatures = modelsRawData[featureSetId].features;
+
+				allModels.push({
+					id: featureSetId + '_' + modelAbbreviation,
+					select_id: modelAbbreviation + ` with ${modelFeatures.length} features`,
+					short_name: modelAbbreviation,
+					full_name: modelNameDict[modelAbbreviation],
+					features: modelFeatures
+				});
+			}
+		}
+
+		selectedModelsId.push(allModels[0].select_id);
+
+		finished = Boolean(
+			cropsClasses.length && allModels.length && Object.keys(modelNameDict).length
+		);
+	});
+
+	function selectModel(e: Event, modelId: string) {
+		const target = e.target as Element;
+		target.classList.toggle('selected');
+
+		const idx = selectedModelsId.indexOf(modelId);
+		if (idx === -1) {
+			selectedModelsId.push(modelId);
+		} else {
+			selectedModelsId.splice(idx, 1);
+		}
+
+		allModels = allModels;
+		console.log(selectedModelsId);
+	}
+</script>
+
+{#if !finished}
+	<div class="mx-auto my-60 w-fit">
+		<div class="mb-4 text-3xl font-bold">Loading</div>
+		<svg
+			class="mx-auto h-20 w-20 animate-spin fill-green-500"
+			version="1.1"
+			xmlns="http://www.w3.org/2000/svg"
+			xmlns:xlink="http://www.w3.org/1999/xlink"
+			x="0px"
+			y="0px"
+			width="122.315px"
+			height="122.88px"
+			viewBox="0 0 122.315 122.88"
+			enable-background="new 0 0 122.315 122.88"
+			xml:space="preserve"
+			><g
+				><path
+					fill-rule="evenodd"
+					clip-rule="evenodd"
+					d="M94.754,14.534c8.844,0,16.014,7.17,16.014,16.012 c0,8.844-7.17,16.015-16.014,16.015c-8.843,0-16.013-7.17-16.013-16.015C78.741,21.704,85.911,14.534,94.754,14.534L94.754,14.534z M109.265,52.121c-7.205,0-13.049,5.844-13.049,13.048c0,7.207,5.844,13.049,13.049,13.051c7.207,0,13.051-5.844,13.051-13.051 C122.315,57.965,116.472,52.121,109.265,52.121L109.265,52.121z M94.135,89.903c-5.032,0-9.114,4.082-9.114,9.113 c0,5.032,4.082,9.114,9.114,9.114c5.031,0,9.113-4.082,9.113-9.114C103.248,93.985,99.166,89.903,94.135,89.903L94.135,89.903z M59.275,104.65c-5.032,0-9.114,4.081-9.114,9.113c0,5.034,4.082,9.116,9.114,9.116s9.113-4.082,9.113-9.116 C68.389,108.731,64.308,104.65,59.275,104.65L59.275,104.65z M23.652,90.86c-4.717,0-8.54,3.823-8.54,8.54 c0,4.715,3.823,8.54,8.54,8.54c4.714,0,8.538-3.825,8.538-8.54C32.19,94.684,28.366,90.86,23.652,90.86L23.652,90.86z M9.096,54.872C4.072,54.872,0,58.944,0,63.968c0,5.021,4.072,9.093,9.096,9.093c5.021,0,9.093-4.072,9.093-9.093 C18.189,58.944,14.116,54.872,9.096,54.872L9.096,54.872z M23.652,17.026c-6.354,0-11.508,5.155-11.508,11.509 s5.154,11.506,11.508,11.506s11.506-5.152,11.506-11.506S30.006,17.026,23.652,17.026L23.652,17.026z M59.341,0 c-7.651,0-13.858,6.205-13.858,13.855c0,7.651,6.207,13.856,13.858,13.856s13.856-6.205,13.856-13.856 C73.197,6.205,66.992,0,59.341,0L59.341,0z"
+				/></g
+			></svg
+		>
+	</div>
+{:else}
+	<div class="space-y-10">
+		<section>
+			<div class="mb-4 flex items-center justify-between">
+				<h2 class="text-2xl font-bold">Crops that models can recommend</h2>
+				<div class="rounded border-2 border-lime-400 px-4 py-1">Total: {cropsClasses.length}</div>
+			</div>
+			<div class="grid-fill-columns grid gap-4 rounded border-2 border-lime-400 bg-lime-100 p-4">
+				{#each cropsClasses as cName}
+					<div class="rounded bg-lime-400 px-4 py-2 text-center font-bold capitalize">
+						{cName}
+					</div>
+				{/each}
+			</div>
+		</section>
+
+		<section>
+			<h2 class="mb-4 text-2xl font-bold">Models</h2>
+
+			<div class="grid-models-fill-columns mb-4 grid gap-4">
+				{#each allModels as model}
+					<button
+						class="group flex cursor-pointer items-center space-x-2 {selectedModelsId.includes(model.select_id) ? 'selected' : null}"
+						on:click={(e) => selectModel(e, model.select_id)}
+					>
+						<div
+							class="pointer-events-none h-6 w-6 rounded border-2 border-green-500 group-[.selected]:bg-green-500"
+						></div>
+						<div class="pointer-events-none">
+							{model.select_id}
+						</div>
+					</button>
+				{/each}
+			</div>
+
+			<div class="space-y-6">
+				{#each allModels as model}
+					{#if selectedModelsId.includes(model.select_id)}
+						<ModelForm id={model.id} modelName={model.full_name} features={model.features} />
+					{/if}
+				{/each}
+			</div>
+		</section>
+	</div>
+{/if}
+
+<style>
+	.grid-fill-columns {
+		grid-template-columns: repeat(auto-fit, minmax(150px, 1.5fr));
+	}
+
+	.grid-models-fill-columns {
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	}
+</style>
