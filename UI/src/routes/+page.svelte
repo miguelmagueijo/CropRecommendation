@@ -77,7 +77,7 @@
 			<h1 class="text-center text-3xl font-bold text-green-950">Choose dataset</h1>
 			<div class="text-center text-lg">
 				Each dataset has it's own crops and models!<br />
-				Feel free to use the one you like the most.
+				Feel free to use the one that suits you better.
 			</div>
 			<div class="mt-4 flex flex-wrap justify-center gap-4">
 				{#each datasets as dName}
