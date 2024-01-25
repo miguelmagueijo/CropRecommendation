@@ -4,6 +4,7 @@ import re
 import pandas as pd
 
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from skops.io import get_untrusted_types, load as load_model
 from sklearn.preprocessing import LabelEncoder
 
@@ -38,6 +39,7 @@ label_encoder.fit(metadata["classes"])
 # Flask APP #
 #############
 app = Flask("Crop Recommendation")
+CORS(app)
 
 @app.route("/")
 def status():
@@ -55,6 +57,10 @@ def get_features():
 @app.route("/crops")
 def get_classes():
     return jsonify(metadata["classes"])
+
+@app.route("/models-names")
+def get_models_names():
+    return jsonify(metadata["models_full_name"])
 
 @app.route("/predict/<model_name>", methods=["POST"])
 def predict(model_name: str):
@@ -84,10 +90,16 @@ def predict(model_name: str):
     
     instance_dict = {}
     for key, value in post_body.to_dict().items():
-        if metadata["features_info"][key]["type"].startswith("int"):
-            instance_dict[key] = int(value)
-        else: 
-            instance_dict[key] = float(value) 
+        if (len(value) == 0):
+            return jsonify({"error": "value_is_empty"}), 400
+
+        try: 
+            if metadata["features_info"][key]["type"].startswith("int"):
+                instance_dict[key] = int(value)
+            else: 
+                instance_dict[key] = float(value)
+        except ValueError:
+            return jsonify({"error": "value_is_not_number"}), 400
 
     instance = pd.DataFrame(instance_dict, index=[0])
     prediction_class = model.predict(instance)[0]
