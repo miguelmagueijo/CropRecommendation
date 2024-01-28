@@ -2,10 +2,11 @@
 	import { onMount } from 'svelte';
 	import ModelForm from '../../../components/ModelForm.svelte';
 	import type { PageData } from './$types';
+	import { API_BASE_URL } from '$lib';
 
 	export let data: PageData;
 
-	const BASE_URL = `http://localhost:5000/${data.page_dataset}`;
+	const BASE_URL = `${API_BASE_URL}/${data.page_dataset}`;
 	
 	let allModels: Array<any> = [];
 

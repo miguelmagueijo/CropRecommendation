@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { API_BASE_URL } from '$lib';
 
 	let datasets: string[] = [];
 	let finished = false;
@@ -7,7 +8,7 @@
 
 	onMount(async () => {
 		try {
-			const response = await fetch('http://localhost:5000/datasets');
+			const response = await fetch(`${API_BASE_URL}/datasets`);
 
 			datasets = (await response.json()).datasets;
 
