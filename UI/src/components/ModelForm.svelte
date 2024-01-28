@@ -62,7 +62,7 @@
                     <label for="input_{ fName }" class="block font-semibold">
                         { fName }
                     </label>
-                    <input class="w-full border-2 border-green-500 px-2 py-1" type="number" id="input_{ fName }" name={ fName } placeholder="0">
+                    <input class="w-full border-2 border-green-500 px-2 py-1" type="number" id="input_{ fName }" name={ fName } step="0.01" placeholder="0">
                 </div>
             {/each}
         </div>
