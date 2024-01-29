@@ -5,10 +5,16 @@ import pandas as pd
 
 from functools import wraps
 from pathlib import Path
-from flask import Flask, jsonify, request
-from flask_cors import CORS
+from flask import Flask, jsonify, request, Blueprint
+from werkzeug.middleware.proxy_fix import ProxyFix
 from skops.io import get_untrusted_types, load as load_model
 from sklearn.preprocessing import LabelEncoder
+
+URL_PREFIX = os.environ.get("API_URL_PREFIX", "/est/p1")
+
+if URL_PREFIX.endswith("/"):
+    URL_PREFIX = URL_PREFIX[:-1]
+
 
 EXPORTS_PATH = Path("Models/")
 
@@ -56,8 +62,17 @@ for folder_name in os.listdir(EXPORTS_PATH):
 #############
 # Flask APP #
 #############
+bp = Blueprint("cr_api", __name__)
 app = Flask("Crop Recommendation")
-CORS(app)
+
+try: # Checks if it's on production
+    os.environ["PORT"]
+    app.wsgi_app = ProxyFix(
+        app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
+    )
+except KeyError: # Development mode
+    from flask_cors import CORS
+    CORS(app)
 
 def check_dataset():
     def _check_dataset(f):
@@ -81,35 +96,35 @@ def check_dataset():
     
     return _check_dataset
 
-@app.route("/")
+@bp.route("/")
 def status():
     return jsonify({"status": "ok"})
 
-@app.route("/datasets")
+@bp.route("/datasets")
 def get_datasets():
     return jsonify({"datasets": list(models.keys())})
 
-@app.route("/<dataset_name>/models")
+@bp.route("/<dataset_name>/models")
 @check_dataset()
 def get_models(dataset_name: str):
     return jsonify(models[dataset_name])
 
-@app.route("/<dataset_name>/features")
+@bp.route("/<dataset_name>/features")
 @check_dataset()
 def get_features(dataset_name: str):
     return jsonify(metadata[dataset_name]["features_info"])
 
-@app.route("/<dataset_name>/crops")
+@bp.route("/<dataset_name>/crops")
 @check_dataset()
 def get_classes(dataset_name: str):
     return jsonify(metadata[dataset_name]["classes"])
 
-@app.route("/<dataset_name>/models-names")
+@bp.route("/<dataset_name>/models-names")
 @check_dataset()
 def get_models_names(dataset_name: str):
     return jsonify(metadata[dataset_name]["models_full_name"])
 
-@app.route("/<dataset_name>/predict/<model_name>", methods=["POST"])
+@bp.route("/<dataset_name>/predict/<model_name>", methods=["POST"])
 def predict(dataset_name: str, model_name: str):
     post_body = request.form
 
@@ -158,6 +173,8 @@ def predict(dataset_name: str, model_name: str):
         prediction_class = label_encoders[dataset_name].inverse_transform([prediction_class])[0]
 
     return jsonify({"prediction": prediction_class})
+
+app.register_blueprint(bp, url_prefix=URL_PREFIX)
 
 if __name__ == "__main__":
     app.run(debug=True)
