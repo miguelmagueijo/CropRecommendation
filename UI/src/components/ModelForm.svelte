@@ -65,6 +65,9 @@
                         { fName } {featuresMetadata[fName].full_name ? `(${featuresMetadata[fName].full_name})` : ""}
                     </label>
                     <input class="w-full border-2 border-green-500 px-2 py-1" type="number" id="input_{ fName }" name={ fName } step="{featuresMetadata[fName].type.includes("int") ? "1" : "0.00001"}" placeholder="0" required>
+                    <div class="text-xs text-right pr-1">
+                        { featuresMetadata[fName].unit ?? "" }
+                    </div>
                 </div>
             {/each}
         </div>

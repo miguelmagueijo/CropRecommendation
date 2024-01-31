@@ -78,7 +78,7 @@
             "max": 205,
             "full_name": "Postassium",
             "help": "How much potassium is in the soil",
-            "unit": "kg/ha"
+            "unit": "Kg/Ha"
         },
         "temperature": {
             "type": "float64",
