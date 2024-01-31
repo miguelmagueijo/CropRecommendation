@@ -8,6 +8,6 @@ This command will build the image if ran with the API main directory as working 
 
 The models need to be provided through a volume, into the container directory `/app/Models`, and the HTTP server will be exposed through port 8000
 
-Example:
+Example (API route will be <your_domain>/est/p1):
 
-`docker run -p 8000:8000 -v ./Models:/app/Models miguelmagueijo/crapi`
+`docker run -p 9500:8000 -e API_URL_PREFIX="/est/p1" -v ./Models:/app/Models miguelmagueijo/crapi`
