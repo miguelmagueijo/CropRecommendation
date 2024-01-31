@@ -1,6 +1,7 @@
 {
     "dataset_name": "AtharvaIngle",
-    "exported_on": 1706218706,
+    "dataset_description": "Synthetically generated dataset with 22 crops and 7 soil characteristics. This dataset is based on Indian data.",
+    "exported_on": 1706636004,
     "warnings": [],
     "train_size": 0.75,
     "test_size": 0.25,
@@ -58,37 +59,51 @@
         "N": {
             "type": "int64",
             "min": 0,
-            "max": 140
+            "max": 140,
+            "full_name": "Nitrogen",
+            "unit": "Ratio (%) content in soil"
         },
         "P": {
             "type": "int64",
             "min": 5,
-            "max": 145
+            "max": 145,
+            "full_name": "Phosphurus",
+            "unit": "Ratio (%) content in soil"
         },
         "K": {
             "type": "int64",
             "min": 5,
-            "max": 205
+            "max": 205,
+            "full_name": "Potassium",
+            "unit": "Ratio (%) content in soil"
         },
         "temperature": {
             "type": "float64",
             "min": 8,
-            "max": 44
+            "max": 44,
+            "full_name": null,
+            "unit": "Average temperature degree Celcius during crop development"
         },
         "humidity": {
             "type": "float64",
             "min": 14,
-            "max": 100
+            "max": 100,
+            "full_name": null,
+            "unit": "Average Relative humidity (RH) in %"
         },
         "ph": {
             "type": "float64",
             "min": 3,
-            "max": 10
+            "max": 10,
+            "full_name": null,
+            "unit": "None, just needs to be a numeric value"
         },
         "rainfall": {
             "type": "float64",
             "min": 20,
-            "max": 299
+            "max": 299,
+            "full_name": null,
+            "unit": "Ammount of rainfall In mm (millimeter) during crops development"
         }
     },
     "models_full_name": {

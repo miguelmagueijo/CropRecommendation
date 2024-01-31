@@ -10,7 +10,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from skops.io import get_untrusted_types, load as load_model
 from sklearn.preprocessing import LabelEncoder
 
-URL_PREFIX = os.environ.get("API_URL_PREFIX", "/est/p1")
+URL_PREFIX = os.environ.get("API_URL_PREFIX", "")
 
 if URL_PREFIX.endswith("/"):
     URL_PREFIX = URL_PREFIX[:-1]
@@ -18,6 +18,7 @@ if URL_PREFIX.endswith("/"):
 
 EXPORTS_PATH = Path("Models/")
 
+datasets = []
 models = {}
 metadata = {}
 label_encoders = {}
@@ -38,6 +39,7 @@ for folder_name in os.listdir(EXPORTS_PATH):
             lb_encoder.fit(raw_metadata["classes"])
             label_encoders[export_name] = lb_encoder
             metadata[export_name] = raw_metadata
+            datasets.append({ "name": folder_name, "desc": raw_metadata["dataset_description"] })
 
 
         for filename in os.listdir(FOLDER_PATH):
@@ -80,10 +82,7 @@ def check_dataset():
         def __check_dataset(*args, **kwargs):
             dataset_name = kwargs.get("dataset_name")
 
-            if dataset_name is None:
-                return jsonify({"error": "no_dataset_name"}), 400
-            
-            if dataset_name not in models.keys():
+            if dataset_name is None or dataset_name not in models.keys():
                 return jsonify({"error": "invalid_dataset"}), 400
             
             result = f(*args, **kwargs)
@@ -102,7 +101,7 @@ def status():
 
 @bp.route("/datasets")
 def get_datasets():
-    return jsonify({"datasets": list(models.keys())})
+    return jsonify({"datasets": datasets})
 
 @bp.route("/<dataset_name>/models")
 @check_dataset()

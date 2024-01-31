@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import ModelForm from '../../../components/ModelForm.svelte';
 	import type { PageData } from './$types';
-	import { API_BASE_URL } from '$lib';
+	import { API_BASE_URL, type FeaturesMetadataJSON } from '$lib';
 
 	export let data: PageData;
 
@@ -15,19 +15,22 @@
 	let loadFail = false;
 	let modelNameDict: Record<string, string> = {};
 	let selectedModelsId: Array<string> = [];
+	let featuresMetadata: FeaturesMetadataJSON;
 
 	onMount(async () => {
 		try {
 			const responses = await Promise.all([
 				fetch(`${BASE_URL}/models-names`),
 				fetch(`${BASE_URL}/crops`),
-				fetch(`${BASE_URL}/models`)
+				fetch(`${BASE_URL}/models`),
+				fetch(`${BASE_URL}/features`)
 			]);
 
 			modelNameDict = await responses[0].json();
 			cropsClasses = await responses[1].json();
 			const modelsRawData = await responses[2].json();
-
+			featuresMetadata = await responses[3].json();
+			
 			for (const featureSetId in modelsRawData) {
 				for (const modelAbbreviation of modelsRawData[featureSetId].models) {
 					const modelFeatures = modelsRawData[featureSetId].features;
@@ -66,7 +69,7 @@
 		}
 
 		allModels = allModels;
-		console.log(selectedModelsId);
+		selectedModelsId = selectedModelsId;
 	}
 </script>
 
@@ -109,20 +112,20 @@
 			</h1>
 			<section>
 				<div class="mb-4 flex items-center justify-between">
-					<h2 class="text-2xl font-bold">Crops that models can recommend</h2>
+					<h2 class="text-2xl font-bold">Crops that are recommended</h2>
 					<div class="rounded border-2 border-lime-400 px-4 py-1">Total: {cropsClasses.length}</div>
 				</div>
-				<div class="grid-fill-columns grid gap-4 rounded border-2 border-lime-400 bg-lime-100 p-4">
+				<ul class="grid-features-fill-columns list-disc list-inside grid gap-x-4 gap-y-2 rounded border-2 border-lime-400 bg-lime-100 p-4">
 					{#each cropsClasses as cName}
-						<div class="rounded bg-lime-400 px-4 py-2 text-center font-bold capitalize">
+						<li class="font-bold capitalize">
 							{cName}
-						</div>
+						</li>
 					{/each}
-				</div>
+				</ul>
 			</section>
 
 			<section>
-				<h2 class="mb-4 text-2xl font-bold">Models</h2>
+				<h2 class="mb-4 text-2xl font-bold">Choose model(s)</h2>
 
 				<div class="grid-models-fill-columns mb-4 grid gap-4">
 					{#each allModels as model}
@@ -141,11 +144,17 @@
 				</div>
 
 				<div class="space-y-6">
-					{#each allModels as model}
-						{#if selectedModelsId.includes(model.select_id)}
-							<ModelForm id={model.id} baseUrl={BASE_URL} modelName={model.full_name} features={model.features} />
-						{/if}
-					{/each}
+					{#if selectedModelsId.length === 0}
+						<div class="text-center bg-yellow-500/50 text-yellow-950 border-2 border-yellow-500 font-bold text-lg py-4 rounded">
+							No model was selected, choose one!
+						</div>
+					{:else}
+						{#each allModels as model}
+							{#if selectedModelsId.includes(model.select_id)}
+								<ModelForm id={model.id} baseUrl={BASE_URL} modelName={model.full_name} features={model.features} featuresMetadata={featuresMetadata} />
+							{/if}
+						{/each}
+					{/if}
 				</div>
 			</section>
 		</div>
@@ -153,8 +162,8 @@
 {/if}
 
 <style>
-	.grid-fill-columns {
-		grid-template-columns: repeat(auto-fit, minmax(150px, 1.5fr));
+	.grid-features-fill-columns {
+		grid-template-columns: repeat(auto-fit, minmax(115px, 1.5fr));
 	}
 
 	.grid-models-fill-columns {

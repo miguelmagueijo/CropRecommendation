@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { API_BASE_URL } from '$lib';
 
-	let datasets: string[] = [];
+	let datasets: Array<{ name: string, desc: string }> = [];
 	let finished = false;
 	let loadFail = false;
 
@@ -80,14 +80,19 @@
 				Each dataset has it's own crops and models!<br />
 				Feel free to use the one that suits you better.
 			</div>
-			<div class="mt-4 flex flex-wrap justify-center gap-4">
-				{#each datasets as dName}
-					<a
-						class="block w-64 rounded border-2 border-green-950 bg-green-500 py-3 text-center text-xl font-bold duration-300 hover:bg-green-800 hover:text-white"
-						href="/dataset/{dName}"
-					>
-						{dName}
-					</a>
+			<div class="mt-4 flex flex-wrap justify-center gap-8">
+				{#each datasets as dataset}
+					<div class="w-64">
+						<a
+							class="block w-64 rounded border-2 border-green-950 bg-green-500 py-3 text-center text-xl font-bold duration-300 hover:bg-green-800 hover:text-white"
+							href="/dataset/{dataset.name}"
+						>
+							{dataset.name}
+						</a>
+						<div class="mt-2 text-center text-sm px-2">
+							{ dataset.desc }
+						</div>
+					</div>
 				{/each}
 			</div>
 		</div>
