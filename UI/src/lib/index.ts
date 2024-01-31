@@ -6,6 +6,7 @@ export interface FeaturesMetadataJSON {
         min: number, 
         max: number,
         full_name: string,
+        help: string,
         unit: string,
     }
 }
