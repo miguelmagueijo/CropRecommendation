@@ -1,7 +1,7 @@
 {
     "dataset_name": "Manikanta",
-    "dataset_description": "Dataset with 6 crops and 11 soil characteristic. The origin of this dataset is unknown.",
-    "exported_on": 1706636159,
+    "dataset_description": "Dataset with 6 crops and 11 soil characteristics. The origin of this dataset is unknown.",
+    "exported_on": 1706718624,
     "warnings": [
         "Some models, such as XGBoost, require label encoding that cannot be incorporated in the pipeline. Use LabelEncoder() and fit it with the array of \"classes\"."
     ],
@@ -59,77 +59,88 @@
             "min": 30,
             "max": 198,
             "full_name": "Nitrogen",
-            "unit": "Measured in Kg/Ha"
+            "help": "How much nitrogen is in the soil",
+            "unit": "Kg/Ha"
         },
         "P": {
             "type": "int64",
             "min": 10,
             "max": 100,
             "full_name": "Phosphorus",
-            "unit": "Measured in Kg/Ha"
+            "help": "How much phosphorus is in the soil",
+            "unit": "Kg/Ha"
         },
         "K": {
             "type": "int64",
             "min": 51,
             "max": 369,
             "full_name": "Potassium",
-            "unit": "Measured in Kg/Ha"
+            "help": "How much potassium is in the soil",
+            "unit": "Kg/Ha"
         },
         "ph": {
             "type": "float64",
             "min": 4,
             "max": 8,
             "full_name": null,
-            "unit": "None, just needs to be a numeric value"
+            "help": "Measure of acidity or basicity of the soil",
+            "unit": null
         },
         "EC": {
             "type": "float64",
             "min": 0,
             "max": 3,
             "full_name": "Electrical Conductivity",
-            "unit": "Measured in dS/m"
+            "help": "Electrical Conductivity of the soil",
+            "unit": "dS/m"
         },
         "S": {
             "type": "float64",
             "min": 0,
             "max": 1,
             "full_name": "Sulphur",
-            "unit": "Measured in percentage (%)"
+            "help": "Sulphur in the soil, measured in Parts Per Million (PPM)",
+            "unit": "%"
         },
         "Cu": {
             "type": "float64",
             "min": 5,
             "max": 35,
             "full_name": "Copper",
-            "unit": "Measured in PPM (Parts Per Million)"
+            "help": "Copper in the soil, measured in Parts Per Million (PPM)",
+            "unit": "PPM"
         },
         "Fe": {
             "type": "float64",
             "min": 38,
             "max": 277,
             "full_name": "Iron",
-            "unit": "Measured in PPM (Parts Per Million)"
+            "help": "Iron in the soil, measured in Parts Per Million (PPM)",
+            "unit": "PPM"
         },
         "Mn": {
             "type": "float64",
             "min": 20,
             "max": 1573,
             "full_name": "Manganese",
-            "unit": "Measured in PPM (Parts Per Million)"
+            "help": "Manganese in the soil, measured in Parts Per Million (PPM)",
+            "unit": "PPM"
         },
         "Zn": {
             "type": "float64",
             "min": 17,
             "max": 70,
             "full_name": "Zinc",
-            "unit": "Measured in PPM (Parts Per Million)"
+            "help": "Zinc in the soil, measured in Parts Per Million (PPM)",
+            "unit": "PPM"
         },
         "B": {
             "type": "float64",
             "min": 1,
             "max": 75,
             "full_name": "Boron",
-            "unit": "Measured in PPM (Parts Per Million)"
+            "help": "Boron in the soil, measured in Parts Per Million (PPM)",
+            "unit": "PPM"
         }
     },
     "models_full_name": {
