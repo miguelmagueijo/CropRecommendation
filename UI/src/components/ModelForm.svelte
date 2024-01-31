@@ -60,13 +60,15 @@
     <form action="{baseUrl}/predict/{id}" on:submit|preventDefault={predictClass}>
         <div class="grid gap-4 features-grid-columns">
             {#each features as fName }
-                <div class="relative">
-                    <div class="absolute hidden bottom-[100%] left-0 right-0 text-xs text-green-50 bg-green-950 p-2 z-10 rounded">
-                        { featuresMetadata[fName].help }
+                <div>
+                    <div class="block relative font-semibold capitalize group">
+                        <div class="absolute hidden group-hover:block bottom-[100%] left-0 right-0 text-xs text-green-50 bg-green-950 p-2 rounded">
+                            { featuresMetadata[fName].help }
+                        </div>
+                        <label class="block w-full truncate" for="input_{ fName }">
+                            { fName } {featuresMetadata[fName].full_name ? `(${featuresMetadata[fName].full_name})` : ""}
+                        </label>
                     </div>
-                    <label for="input_{ fName }" class="block font-semibold capitalize truncate overflow-visible">
-                        { fName } {featuresMetadata[fName].full_name ? `(${featuresMetadata[fName].full_name})` : ""}
-                    </label>
                     <input class="w-full border-2 border-green-500 px-2 py-1" type="number" id="input_{ fName }" name={ fName } step="{featuresMetadata[fName].type.includes("int") ? "1" : "0.00001"}" placeholder="0" required>
                     <div class="text-xs text-right pr-1">
                         { featuresMetadata[fName].unit ?? "" }
